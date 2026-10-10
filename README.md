@@ -90,7 +90,7 @@ Der Workflow `.github/workflows/native.yml` baut beide bei jedem Push.
 
 - **Android:** Die fertige APK liegt im Release **„android-latest“** des Repos – auf dem Handy herunterladen, öffnen, „Installation aus unbekannten Quellen“ erlauben.
 - **iOS:** Apple erlaubt die Installation nur signiert. Dafür brauchst du einen Mac mit Xcode:
-  `npm ci && npm run build && npx cap sync ios && npx cap open ios`, dann in Xcode unter *Signing* deine Apple-ID wählen und auf dem per Kabel verbundenen iPhone starten
+  `npm ci && npm run ios`, dann in Xcode unter *Signing* deine Apple-ID wählen und auf dem per Kabel verbundenen iPhone starten
   (mit kostenloser Apple-ID 7 Tage gültig; für TestFlight/App Store ist das Apple-Developer-Programm nötig). Der CI-Job prüft nur, dass das iOS-Projekt kompiliert.
 
 Nach Änderungen am Web-Code: `npm run build && npx cap sync`. App-Icons und Splash-Screens werden aus `assets/` erzeugt (`npx @capacitor/assets generate`).
