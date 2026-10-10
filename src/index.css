@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+body {
+  @apply bg-pink-50 font-sans text-slate-700;
+}
+
+.pt-safe {
+  padding-top: max(0.5rem, env(safe-area-inset-top));
+}
+.pb-safe {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+@keyframes pop-in {
+  0% {
+    transform: scale(0.6) translateY(10px);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.animate-pop {
+  animation: pop-in 0.3s ease-out both;
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+.animate-sheet {
+  animation: sheet-up 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+}
+
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(-12deg);
+  }
+  75% {
+    transform: rotate(12deg);
+  }
+}
+.animate-wiggle {
+  animation: wiggle 0.6s ease-in-out infinite;
+}
