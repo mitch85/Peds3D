@@ -72,3 +72,25 @@ Siehe [`public/models/README.md`](public/models/README.md). Kurz: GLB nach `publ
 ## Performance
 
 Geteilte Toon-Materialien, gepoolte Partikel (ein Sprite-Pool), Animation ohne React-Re-Renders (mutable Refs in `useFrame`), 1024er-Shadowmap und adaptive Pixeldichte über `PerformanceMonitor` – Ziel 60 fps auf Mittelklasse-Handys.
+
+## Auf dem Handy installieren
+
+### iPhone / Android als Web-App (empfohlen, kostenlos)
+
+Jeder Push baut die App und veröffentlicht sie über GitHub Pages (`.github/workflows/deploy.yml`) unter
+**https://mitch85.github.io/Peds3D/**. Einmalig im Repo unter *Settings → Pages → Source* „GitHub Actions“ auswählen.
+
+- **iPhone:** Link in **Safari** öffnen → Teilen-Symbol → „Zum Home-Bildschirm“. Die App startet danach im Vollbild und läuft offline.
+- **Android:** Link in Chrome öffnen → Menü → „App installieren“.
+
+### Native Apps (Capacitor)
+
+Die Web-App wird mit [Capacitor](https://capacitorjs.com) in native Projekte verpackt (`android/`, `ios/`).
+Der Workflow `.github/workflows/native.yml` baut beide bei jedem Push.
+
+- **Android:** Die fertige APK liegt im Release **„android-latest“** des Repos – auf dem Handy herunterladen, öffnen, „Installation aus unbekannten Quellen“ erlauben.
+- **iOS:** Apple erlaubt die Installation nur signiert. Dafür brauchst du einen Mac mit Xcode:
+  `npm ci && npm run build && npx cap sync ios && npx cap open ios`, dann in Xcode unter *Signing* deine Apple-ID wählen und auf dem per Kabel verbundenen iPhone starten
+  (mit kostenloser Apple-ID 7 Tage gültig; für TestFlight/App Store ist das Apple-Developer-Programm nötig). Der CI-Job prüft nur, dass das iOS-Projekt kompiliert.
+
+Nach Änderungen am Web-Code: `npm run build && npx cap sync`. App-Icons und Splash-Screens werden aus `assets/` erzeugt (`npx @capacitor/assets generate`).

@@ -1,0 +1,68 @@
+name: Native apps
+
+on:
+  push:
+    branches: [claude/petpal-3d-tamagotchi-game-xp7zut, main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          # Gradle 8.2 (Capacitor 6 template) runs on JDK 17
+          java-version: 17
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: npx cap sync android
+      - name: Build APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+      - name: Rename APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk PetPal3D.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PetPal3D-android
+          path: PetPal3D.apk
+      - name: Publish as "android-latest" release (direct download on the phone)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete android-latest --yes --cleanup-tag || true
+          gh release create android-latest PetPal3D.apk \
+            --target "$GITHUB_SHA" --prerelease \
+            --title "PetPal 3D – Android (neuester Stand)" \
+            --notes "APK auf dem Android-Handy herunterladen und öffnen. Beim ersten Mal 'Installation aus unbekannten Quellen' erlauben."
+
+  ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx cap sync ios
+      - name: Build for the iOS simulator (no signing needed)
+        run: |
+          xcodebuild -workspace ios/App/App.xcworkspace -scheme App \
+            -configuration Debug -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build
