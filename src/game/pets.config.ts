@@ -31,6 +31,11 @@ export interface PetModelConfig {
   url: string;
   scale: number;
   clips: Partial<Record<import('../pets/clips').ClipName, string>>;
+  /** Name of the head bone/node; accessories (hat, bow, ...) get attached there. */
+  headBone?: string;
+  /** Accessory offset and scale in the head bone's local space (bones are often scaled oddly). */
+  accessoryOffset?: [number, number, number];
+  accessoryScale?: number;
 }
 
 export interface PetConfig {
@@ -58,6 +63,8 @@ export interface PetConfig {
   locomotion: Locomotion;
   /** Walking speed in world units per second. */
   speed: number;
+  /** Pitch factor for the pet's sound effects (higher = squeakier). */
+  voice: number;
   look: PetLook;
   model?: PetModelConfig;
 }
@@ -76,6 +83,7 @@ export const PETS: Record<SpeciesId, PetConfig> = {
     temperature: 'warm',
     locomotion: 'trot',
     speed: 1.3,
+    voice: 1.2,
     look: {
       body: '#f6a96b',
       belly: '#fde6cf',
@@ -100,6 +108,7 @@ export const PETS: Record<SpeciesId, PetConfig> = {
     temperature: 'neutral',
     locomotion: 'trot',
     speed: 1.6,
+    voice: 0.9,
     look: {
       body: '#c8925c',
       belly: '#f4e1c4',
@@ -124,6 +133,7 @@ export const PETS: Record<SpeciesId, PetConfig> = {
     temperature: 'neutral',
     locomotion: 'hop',
     speed: 1.4,
+    voice: 1.4,
     look: {
       body: '#f1eef0',
       belly: '#ffffff',
@@ -148,6 +158,7 @@ export const PETS: Record<SpeciesId, PetConfig> = {
     temperature: 'warm',
     locomotion: 'trot',
     speed: 1.2,
+    voice: 0.7,
     look: {
       body: '#7fcf8f',
       belly: '#f3e9a8',
@@ -172,6 +183,7 @@ export const PETS: Record<SpeciesId, PetConfig> = {
     temperature: 'cold',
     locomotion: 'waddle',
     speed: 0.9,
+    voice: 1.05,
     look: {
       body: '#3d4a5c',
       belly: '#fbfbfb',

@@ -26,6 +26,7 @@ Im Dev-Modus ist der Store in der Browser-Konsole als `petpal` verfügbar, z. B.
 - **Arten-Eigenheiten:** Hund wedelt je nach Laune, Drache speit Funken, Pinguin watschelt und mag den Kälte-Raum, Hase hoppelt.
 - **Szene:** Wohnzimmer mit Futterecke, Katzenklo, Körbchen, Spielzeugkorb; Tag/Nacht nach echter Uhrzeit (Fenster, Licht); Toon-Shading, weiche Schatten. Kamera per Wischen drehbar, Pinch-Zoom, Doppeltipp zentriert auf das Tier.
 - **Fortschritt:** Baby → Kind (24 h) → Erwachsen (72 h) mit wachsendem Modell und neuen Idle-Animationen (Purzeln, Hüpfen, Pirouette). Münzen für gute Pflege, Shop (Futter, Spielzeug, Deko, Accessoires), Tagebuch mit Alter, Lieblingsaktivität und Pflege-Serie.
+- **Sound:** Alle Geräusche (Schmatzen, Schnarchen, Seifenblasen, Münzen, Fanfare …) werden per WebAudio erzeugt – keine Audiodateien, offline-fähig, jedes Tier mit eigener Stimmlage (`voice` in der Config). In den Einstellungen abschaltbar.
 - **PWA:** installierbar, offline-fähig; optionale Benachrichtigungen, wenn das Tier im Hintergrund dringend etwas braucht.
 
 ## Projektstruktur
@@ -42,6 +43,7 @@ src/
                behaviors.ts (Abläufe: Essen, Klo, …), PlaceholderPet, GltfPet, Accessory
   ui/          HUD, Aktionsleiste, Menüs, Shop, Tagebuch, Einstellungen, Onboarding
   i18n/        Übersetzungen (de.ts) + t()-Funktion
+  audio/       Prozedurale Soundeffekte (sfx.ts)
   assets/      Sounds, Texturen
 public/models/ GLB-Modelle
 ```

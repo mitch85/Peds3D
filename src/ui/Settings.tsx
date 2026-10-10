@@ -20,6 +20,7 @@ if (typeof window !== 'undefined') {
 export function Settings() {
   const name = useGameStore((s) => s.pet?.name ?? '');
   const enabled = useGameStore((s) => s.settings.notifications);
+  const sound = useGameStore((s) => s.settings.sound);
   const [denied, setDenied] = useState(false);
   const [canInstall, setCanInstall] = useState(!!deferredInstall);
 
@@ -49,6 +50,19 @@ export function Settings() {
   return (
     <Sheet title={t('settings.title')}>
       <div className="space-y-3">
+        <label className="flex cursor-pointer items-center gap-3 rounded-2xl bg-slate-50 p-3">
+          <span className="text-2xl">{sound ? '🔊' : '🔇'}</span>
+          <div className="flex-1">
+            <div className="font-extrabold">{t('settings.sound')}</div>
+            <div className="text-xs font-bold text-slate-400">{t('settings.soundHint')}</div>
+          </div>
+          <input
+            type="checkbox"
+            checked={sound}
+            onChange={() => useGameStore.getState().setSettings({ sound: !sound })}
+            className="h-6 w-6 accent-pink-500"
+          />
+        </label>
         {notificationsSupported() && (
           <label className="flex cursor-pointer items-center gap-3 rounded-2xl bg-slate-50 p-3">
             <span className="text-2xl">🔔</span>

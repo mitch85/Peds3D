@@ -8,6 +8,7 @@ import type { AccessoryId, DecorId, FoodId, GameState, ShopItemId, SpeciesId, To
 
 export interface Settings {
   notifications: boolean;
+  sound: boolean;
 }
 
 interface GameStore extends GameState {
@@ -63,7 +64,7 @@ export const useGameStore = create<GameStore>()(
 
       return {
         ...actions.initialGameState(Date.now()),
-        settings: { notifications: false },
+        settings: { notifications: false, sound: true },
 
         adopt(species, name) {
           set(actions.adopt(species, name, Date.now()));
@@ -103,6 +104,10 @@ export const useGameStore = create<GameStore>()(
       version: 1,
       storage: createJSONStorage(() => localStorage),
       partialize: (s) => ({ ...pickState(s), settings: s.settings }),
+      merge: (persisted, current) => {
+        const p = (persisted ?? {}) as Partial<GameStore>;
+        return { ...current, ...p, settings: { ...current.settings, ...p.settings } };
+      },
     },
   ),
 );

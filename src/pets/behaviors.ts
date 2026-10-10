@@ -1,3 +1,4 @@
+import { sfx, type SfxName } from '../audio/sfx';
 import { FOODS } from '../game/items';
 import type { FoodId, GameEvent, ToyId, Vec2 } from '../game/types';
 import { clampToRoom, randomRoomPoint, SPOTS } from '../scene/layout';
@@ -17,7 +18,11 @@ function every(interval: number, fn: () => void) {
   };
 }
 
+/** Plays a sound in the pet's own voice. */
+const say = (brain: PetBrain, name: SfxName) => sfx(name, brain.cfg.voice);
+
 function joy(brain: PetBrain, hearts = 3) {
+  say(brain, 'heart');
   const h = brain.headPosition();
   fx.emit('heart', h.x, h.y + 0.2, h.z, hearts);
   if (brain.cfg.id === 'dragon') fx.emit('spark', h.x + Math.sin(brain.yaw) * 0.25, h.y, h.z + Math.cos(brain.yaw) * 0.25, 10);
@@ -52,16 +57,21 @@ export function eat(brain: PetBrain, food: FoodId, favorite: boolean): Behavior 
           props.food.food = food;
           props.food.amount = 1;
           props.food.visible = true;
+          sfx('pop');
         },
       },
       {
         clip: 'eat',
         duration,
         face: bowl.face,
-        onUpdate: (t, dt) => {
-          props.food.amount = Math.max(0.05, 1 - t / duration);
-          if (Math.random() < dt * 4) fx.emit('crumb', bowl.at.x + 0.1, 0.2, bowl.at.z, 1);
-        },
+        onUpdate: (() => {
+          const chew = every(0.38, () => say(brain, 'chomp'));
+          return (t: number, dt: number) => {
+            props.food.amount = Math.max(0.05, 1 - t / duration);
+            if (Math.random() < dt * 4) fx.emit('crumb', bowl.at.x + 0.1, 0.2, bowl.at.z, 1);
+            chew(t, dt);
+          };
+        })(),
       },
       {
         clip: 'happy',
@@ -70,6 +80,7 @@ export function eat(brain: PetBrain, food: FoodId, favorite: boolean): Behavior 
         emote: { icon: favorite ? '😍' : '😋', kind: 'speech' },
         onStart: () => {
           props.food.visible = false;
+          say(brain, 'yum');
           joy(brain, favorite ? 6 : 2);
         },
       },
@@ -95,6 +106,7 @@ export function toilet(brain: PetBrain): Behavior {
         emote: { icon: '😌', kind: 'speech' },
         onStart: () => {
           fx.emit('star', litter.at.x, 0.5, litter.at.z, 4);
+          say(brain, 'relief');
           joy(brain, 1);
         },
       },
@@ -109,7 +121,7 @@ export function accident(brain: PetBrain): Behavior {
     name: 'accident',
     busy: true,
     steps: [
-      { clip: 'fidget', duration: 0.9, emote: { icon: '😣', kind: 'speech' } },
+      { clip: 'fidget', duration: 0.9, emote: { icon: '😣', kind: 'speech' }, onStart: () => say(brain, 'oops') },
       { clip: 'squat', duration: 1.8, face: 'camera', emote: { icon: '…', kind: 'speech' } },
       {
         clip: 'walk',
@@ -139,7 +151,7 @@ export function wash(brain: PetBrain): Behavior {
     steps: [
       { clip: 'walk', walkTo: SPOTS.center.stand },
       { clip: 'scrub', duration: 3.2, face: 'camera', emote: { icon: '🫧', kind: 'speech' }, onUpdate: bubbles },
-      { clip: 'shake', duration: 1.3, onUpdate: drops },
+      { clip: 'shake', duration: 1.3, onUpdate: drops, onStart: () => sfx('shake') },
       {
         clip: 'happy',
         duration: 1,
@@ -147,6 +159,7 @@ export function wash(brain: PetBrain): Behavior {
         onStart: () => {
           const h = brain.headPosition();
           fx.emit('star', h.x, h.y, h.z, 6);
+          sfx('sparkle');
         },
       },
     ],
@@ -159,6 +172,7 @@ export function sleep(brain: PetBrain): Behavior {
   const zzz = every(1.1, () => {
     const h = brain.headPosition(0.5);
     fx.emit('zzz', h.x, h.y + 0.15, h.z, 1);
+    if (Math.random() < 0.5) say(brain, 'snore');
   });
   return {
     name: 'sleep',
@@ -175,7 +189,7 @@ export function wake(brain: PetBrain): Behavior {
     name: 'wake',
     busy: false,
     steps: [
-      { clip: 'shake', duration: 0.8, emote: { icon: '☀️', kind: 'speech' } },
+      { clip: 'shake', duration: 0.8, emote: { icon: '☀️', kind: 'speech' }, onStart: () => say(brain, 'boing') },
       { clip: 'happy', duration: 0.8, face: 'camera', onStart: () => joy(brain, 1) },
     ],
   };
@@ -200,6 +214,7 @@ function ballPlay(brain: PetBrain, favorite: boolean): Behavior {
     const to = randomRoomPoint();
     flight = { t: 0, from: { ...THROW_FROM }, to, dur: 1.1, active: true, carried: false };
     ball.visible = true;
+    sfx('whoosh');
   };
   const landing = (): Vec2 => flight.to;
   const catchStep = (): Step => ({
@@ -208,6 +223,7 @@ function ballPlay(brain: PetBrain, favorite: boolean): Behavior {
     onStart: () => {
       flight.active = false;
       flight.carried = true;
+      say(brain, 'boing');
       joy(brain, 1);
     },
   });
@@ -281,12 +297,16 @@ function laserPlay(brain: PetBrain, favorite: boolean): Behavior {
         emote: { icon: '👀', kind: 'speech' },
         onStart: () => {
           laser.visible = true;
+          sfx('zap');
         },
       },
       {
         clip: () => (Math.hypot(laser.x - brain.pos.x, laser.z - brain.pos.z) < 0.5 ? 'pounce' : 'run'),
         chase: dot,
         until: () => t > duration,
+        onUpdate: every(1.1, () => {
+          if (Math.hypot(laser.x - brain.pos.x, laser.z - brain.pos.z) < 0.5) say(brain, 'boing');
+        }),
       },
       {
         clip: 'happy',
@@ -329,9 +349,9 @@ function featherPlay(brain: PetBrain, favorite: boolean): Behavior {
           feather.visible = true;
         },
       },
-      { clip: 'jump', duration: 1.8, face: () => ({ x: feather.x, z: feather.z }) },
+      { clip: 'jump', duration: 1.8, face: () => ({ x: feather.x, z: feather.z }), onUpdate: every(0.9, () => say(brain, 'boing')) },
       { clip: 'pounce', duration: 1.1, face: () => ({ x: feather.x, z: feather.z }) },
-      { clip: 'jump', duration: 1.8, face: () => ({ x: feather.x, z: feather.z }) },
+      { clip: 'jump', duration: 1.8, face: () => ({ x: feather.x, z: feather.z }), onUpdate: every(0.9, () => say(brain, 'boing')) },
       {
         clip: 'happy',
         duration: 1.4,
@@ -365,10 +385,22 @@ export function stroke(brain: PetBrain): Behavior {
     const h = brain.headPosition();
     fx.emit('heart', h.x, h.y + 0.15, h.z, 1);
   });
+  const coo = every(0.9, () => say(brain, 'heart'));
   return {
     name: 'stroke',
     busy: false,
-    steps: [{ clip: 'nuzzle', face: 'camera', until: () => !brain.stroking, onUpdate: hearts, emote: { icon: '🥰', kind: 'speech' } }],
+    steps: [
+      {
+        clip: 'nuzzle',
+        face: 'camera',
+        until: () => !brain.stroking,
+        onUpdate: (t, dt) => {
+          hearts(t, dt);
+          coo(t, dt);
+        },
+        emote: { icon: '🥰', kind: 'speech' },
+      },
+    ],
   };
 }
 
@@ -376,15 +408,15 @@ export function boop(brain: PetBrain): Behavior {
   return {
     name: 'boop',
     busy: false,
-    steps: [{ clip: 'hop', duration: 0.55, face: 'camera', emote: { icon: brain.world.happiness > 0.5 ? '😊' : '❓', kind: 'speech' } }],
+    steps: [{ clip: 'hop', duration: 0.55, face: 'camera', onStart: () => say(brain, 'pop'), emote: { icon: brain.world.happiness > 0.5 ? '😊' : '❓', kind: 'speech' } }],
   };
 }
 
-export function refuse(): Behavior {
+export function refuse(brain: PetBrain): Behavior {
   return {
     name: 'refuse',
     busy: false,
-    steps: [{ clip: 'refuse', duration: 1.2, face: 'camera', emote: { icon: '🙅', kind: 'speech' } }],
+    steps: [{ clip: 'refuse', duration: 1.2, face: 'camera', onStart: () => say(brain, 'refuse'), emote: { icon: '🙅', kind: 'speech' } }],
   };
 }
 
@@ -401,6 +433,7 @@ export function celebrate(brain: PetBrain): Behavior {
         onStart: () => {
           const h = brain.headPosition();
           fx.emit('confetti', h.x, h.y + 0.6, h.z, 40);
+          sfx('fanfare');
         },
       },
     ],
@@ -414,7 +447,7 @@ export function handleGameEvent(brain: PetBrain, e: GameEvent) {
       brain.run(eat(brain, e.food, e.favorite));
       break;
     case 'refuse':
-      if (!brain.busy) brain.run(refuse());
+      if (!brain.busy) brain.run(refuse(brain));
       break;
     case 'play':
       brain.run(play(brain, e.toy, e.favorite));
@@ -437,6 +470,7 @@ export function handleGameEvent(brain: PetBrain, e: GameEvent) {
       break;
     }
     case 'clean':
+      sfx('sparkle');
       if (!brain.busy) brain.showEmote({ icon: '✨', kind: 'speech' }, 1.5);
       break;
     case 'stageUp':
@@ -447,6 +481,7 @@ export function handleGameEvent(brain: PetBrain, e: GameEvent) {
       // handled state-driven by syncSleep
       break;
     case 'coins':
+      sfx('coin');
       break;
   }
 }

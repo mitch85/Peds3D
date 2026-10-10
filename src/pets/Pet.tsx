@@ -169,7 +169,7 @@ export function Pet({ species, preview = false }: PetProps) {
           {cfg.model ? (
             <ModelBoundary fallback={placeholder}>
               <Suspense fallback={placeholder}>
-                <GltfPet ref={rig} model={cfg.model} />
+                <GltfPet ref={rig} model={cfg.model} accessory={accessory} biped={cfg.look.legs === 2} />
               </Suspense>
             </ModelBoundary>
           ) : (

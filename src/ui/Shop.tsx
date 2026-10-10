@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { sfx } from '../audio/sfx';
 import { ACCESSORIES, DECOR, FOODS, TOYS, type ShopCategory } from '../game/items';
 import type { AccessoryId, DecorId, FoodId, ShopItemId, ToyId } from '../game/types';
 import { t } from '../i18n';
@@ -35,6 +36,7 @@ export function Shop() {
       const text = errorText(error, '');
       if (text) toast(text);
     } else {
+      sfx('coin');
       toast(t('toast.bought', { item: `${row.emoji} ${row.name}` }));
     }
   };

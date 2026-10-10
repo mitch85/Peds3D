@@ -111,6 +111,8 @@ export const de = {
   'settings.notifications': 'Benachrichtigungen',
   'settings.notificationsHint': 'Erinnert dich, wenn {name} dringend etwas braucht.',
   'settings.notificationsDenied': 'Benachrichtigungen sind im Browser blockiert.',
+  'settings.sound': 'Geräusche',
+  'settings.soundHint': 'Schmatzen, Schnarchen, Plätschern und mehr.',
   'settings.reset': 'Neues Haustier',
   'settings.resetConfirm': 'Wirklich neu anfangen? {name} geht dann in ein neues Zuhause.',
   'settings.install': 'App installieren',

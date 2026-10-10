@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { setSoundEnabled, sfx, unlockAudio } from './audio/sfx';
 import type { SpeciesId } from './game/types';
 import { t } from './i18n';
 import { Experience } from './scene/Experience';
@@ -22,6 +23,19 @@ export function App() {
   const name = useGameStore((s) => s.pet?.name ?? '');
   const panel = useUiStore((s) => s.panel);
   const [previewSpecies, setPreviewSpecies] = useState<SpeciesId>('cat');
+  const sound = useGameStore((s) => s.settings.sound);
+
+  useEffect(() => setSoundEnabled(sound), [sound]);
+
+  // Browsers only allow audio after a user gesture; also give every button a soft tap sound
+  useEffect(() => {
+    const onDown = (e: PointerEvent) => {
+      unlockAudio();
+      if ((e.target as HTMLElement | null)?.closest('button')) sfx('tap');
+    };
+    window.addEventListener('pointerdown', onDown, true);
+    return () => window.removeEventListener('pointerdown', onDown, true);
+  }, []);
 
   return (
     <div className="relative h-full w-full bg-gradient-to-b from-pink-50 to-amber-50">
