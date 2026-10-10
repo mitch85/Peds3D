@@ -4,6 +4,8 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  // Sub-path when hosted on GitHub Pages (e.g. /Peds3D/), root otherwise
+  base: process.env.BASE_PATH ?? '/',
   plugins: [
     react(),
     VitePWA({

@@ -7,6 +7,7 @@ import { useGameStore } from '../store/gameStore';
 
 const URGENT: Mood[] = ['needsToilet', 'hungry', 'sick', 'tired', 'bored', 'dirty'];
 const COOLDOWN_MS = 30 * 60 * 1000;
+const ICON = `${import.meta.env.BASE_URL}pwa-192.png`;
 
 export function notificationsSupported() {
   return typeof window !== 'undefined' && 'Notification' in window;
@@ -21,7 +22,7 @@ export async function requestNotificationPermission(): Promise<boolean> {
 
 async function show(title: string, body: string) {
   const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : undefined;
-  const options: NotificationOptions = { body, icon: '/pwa-192.png', badge: '/pwa-192.png', tag: 'petpal-need' };
+  const options: NotificationOptions = { body, icon: ICON, badge: ICON, tag: 'petpal-need' };
   if (reg) await reg.showNotification(title, options);
   else new Notification(title, options);
 }

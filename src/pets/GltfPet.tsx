@@ -22,7 +22,8 @@ interface Props {
 
 export const GltfPet = forwardRef<RigHandle, Props>(function GltfPet({ model, accessory, biped }, ref) {
   const group = useRef<THREE.Group>(null);
-  const { scene, animations } = useGLTF(model.url);
+  const url = model.url.startsWith('/') ? import.meta.env.BASE_URL + model.url.slice(1) : model.url;
+  const { scene, animations } = useGLTF(url);
   const object = useMemo(() => {
     const c = clone(scene);
     c.traverse((o) => {
